@@ -51,6 +51,35 @@ button:disabled {
   backdrop-filter: blur(12px);
 }
 
+.brand-heading {
+  display: flex;
+  min-width: 0;
+  align-items: center;
+  gap: 14px;
+}
+
+.brand-logo {
+  display: grid;
+  width: 56px;
+  height: 56px;
+  flex: 0 0 auto;
+  place-items: center;
+  border-radius: 18px;
+  background: linear-gradient(135deg, #777ef6, #31c9b5);
+  box-shadow: 0 10px 20px rgba(91, 97, 207, 0.2);
+  transition: background 0.3s ease, box-shadow 0.3s ease;
+}
+
+.brand-logo svg {
+  width: 31px;
+  height: 31px;
+  fill: none;
+  stroke: #fff;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-width: 2.6;
+}
+
 .card-header {
   display: flex;
   align-items: center;
@@ -285,10 +314,13 @@ h1 {
 .todo-list {
   display: grid;
   gap: 8px;
+  align-content: start;
+  height: 190px;
   max-height: 365px;
   margin: 0;
   padding: 0 28px 20px;
   overflow: auto;
+  scrollbar-gutter: stable;
   list-style: none;
 }
 
@@ -489,6 +521,11 @@ h1 {
   border-color: rgba(255, 255, 255, 0.08);
   background: rgba(27, 29, 46, 0.92);
   box-shadow: 0 22px 60px rgba(0, 0, 0, 0.28), 0 3px 9px rgba(0, 0, 0, 0.18);
+}
+
+:root[data-theme='dark'] .brand-logo {
+  background: linear-gradient(135deg, #211b4f 0%, #494187 52%, #146f82 100%);
+  box-shadow: 0 12px 30px rgba(35, 24, 108, 0.5), inset 0 0 0 1px rgba(255, 255, 255, 0.16);
 }
 
 :root[data-theme='dark'] .eyebrow {
@@ -694,6 +731,16 @@ h1 {
 }
 
 @media (max-width: 390px) {
+  .brand-heading {
+    gap: 12px;
+  }
+
+  .brand-logo {
+    width: 50px;
+    height: 50px;
+    border-radius: 16px;
+  }
+
   .card-header {
     align-items: flex-start;
   }

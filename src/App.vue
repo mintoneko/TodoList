@@ -70,6 +70,10 @@ watch(
       'content',
       theme === 'dark' ? '#151725' : '#6366f1',
     )
+    document.querySelector('link[rel="icon"]')?.setAttribute(
+      'href',
+      theme === 'dark' ? '/favicon-dark.svg' : '/favicon.svg',
+    )
   },
   { immediate: true },
 )
@@ -96,7 +100,7 @@ function addTodo() {
   const title = newTodo.value.trim()
   if (!title) return
 
-  todos.value.unshift({
+  todos.value.push({
     id: createId(),
     title,
     completed: false,
@@ -148,10 +152,17 @@ function cancelEdit() {
   <main class="page-shell">
     <section class="todo-card" aria-labelledby="page-title">
       <header class="card-header">
-        <div>
-          <p class="eyebrow">FOCUS LIST</p>
-          <h1 id="page-title">今天要做什么？</h1>
-          <p class="subtitle">把想法写下来，逐个完成。</p>
+        <div class="brand-heading">
+          <div class="brand-logo" aria-hidden="true">
+            <svg viewBox="0 0 24 24" focusable="false">
+              <path d="M5 12.5 9.25 17 19 7" />
+            </svg>
+          </div>
+          <div>
+            <p class="eyebrow">FOCUS LIST</p>
+            <h1 id="page-title">今天要做什么？</h1>
+            <p class="subtitle">把想法写下来，逐个完成。</p>
+          </div>
         </div>
         <div class="header-actions">
           <div class="theme-switcher" role="group" aria-label="外观设置">
