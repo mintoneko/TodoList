@@ -159,7 +159,7 @@ function cancelEdit() {
             </svg>
           </div>
           <div>
-            <p class="eyebrow">FOCUS LIST</p>
+            <p class="eyebrow">TODO LIST</p>
             <h1 id="page-title">今天要做什么？</h1>
             <p class="subtitle">把想法写下来，逐个完成。</p>
           </div>
