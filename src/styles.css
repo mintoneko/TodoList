@@ -491,6 +491,13 @@ h1 {
   font-size: 13px;
 }
 
+.storage-warning {
+  margin: 0;
+  padding: 0 38px 14px;
+  color: #c34c5f;
+  font-size: 12px;
+}
+
 .card-footer {
   display: flex;
   justify-content: space-between;
@@ -662,6 +669,10 @@ h1 {
   color: #e1e3ef;
 }
 
+:root[data-theme='dark'] .storage-warning {
+  color: #ff9baa;
+}
+
 :root[data-theme='dark'] .card-footer {
   border-top-color: #353853;
   color: #a3a6b8;
@@ -723,6 +734,10 @@ h1 {
 
   .card-footer {
     padding: 16px 22px;
+  }
+
+  .storage-warning {
+    padding: 0 22px 14px;
   }
 
   .edit-hint {

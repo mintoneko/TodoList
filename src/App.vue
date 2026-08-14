@@ -3,18 +3,60 @@ import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 
 const STORAGE_KEY = 'vue3-todo-list-items'
 const THEME_STORAGE_KEY = 'vue3-todo-list-theme-mode'
+const MAX_TITLE_LENGTH = 120
 const THEME_OPTIONS = [
   { value: 'system', label: '系统' },
   { value: 'light', label: '浅色' },
   { value: 'dark', label: '深色' },
 ]
 
+function createId() {
+  return typeof globalThis.crypto?.randomUUID === 'function'
+    ? globalThis.crypto.randomUUID()
+    : `${Date.now()}-${Math.random().toString(16).slice(2)}`
+}
+
+function normalizeTodo(todo) {
+  if (
+    !todo ||
+    typeof todo !== 'object' ||
+    Array.isArray(todo) ||
+    typeof todo.title !== 'string'
+  ) {
+    return null
+  }
+
+  const title = todo.title.trim().slice(0, MAX_TITLE_LENGTH)
+  if (!title) return null
+
+  return {
+    id: typeof todo.id === 'string' && todo.id.trim() ? todo.id.trim() : createId(),
+    title,
+    completed: typeof todo.completed === 'boolean' ? todo.completed : false,
+    createdAt:
+      typeof todo.createdAt === 'number' && Number.isFinite(todo.createdAt) && todo.createdAt >= 0
+        ? todo.createdAt
+        : Date.now(),
+  }
+}
+
 function loadTodos() {
   try {
     const savedTodos = JSON.parse(localStorage.getItem(STORAGE_KEY) ?? '[]')
-    return Array.isArray(savedTodos)
-      ? savedTodos.filter((todo) => typeof todo?.title === 'string')
-      : []
+    if (!Array.isArray(savedTodos)) return []
+
+    const usedIds = new Set()
+    return savedTodos.reduce((items, todo) => {
+      const normalizedTodo = normalizeTodo(todo)
+      if (!normalizedTodo) return items
+
+      while (usedIds.has(normalizedTodo.id)) {
+        normalizedTodo.id = createId()
+      }
+      usedIds.add(normalizedTodo.id)
+      items.push(normalizedTodo)
+      return items
+    }, [])
   } catch {
     return []
   }
@@ -36,18 +78,42 @@ const editingId = ref(null)
 const editingTitle = ref('')
 const editInput = ref(null)
 const themeMode = ref(loadThemeMode())
+const storageWriteFailed = ref(false)
 const systemPrefersDark = ref(
   typeof window !== 'undefined' && window.matchMedia('(prefers-color-scheme: dark)').matches,
 )
 let themeMediaQuery
 
+function writeStorage(key, value) {
+  try {
+    localStorage.setItem(key, value)
+    return true
+  } catch {
+    return false
+  }
+}
+
+function persistTodos(items) {
+  try {
+    storageWriteFailed.value = !writeStorage(STORAGE_KEY, JSON.stringify(items))
+  } catch {
+    storageWriteFailed.value = true
+  }
+}
+
+function persistThemeMode(mode) {
+  if (!writeStorage(THEME_STORAGE_KEY, mode)) {
+    storageWriteFailed.value = true
+  }
+}
+
 watch(
   todos,
-  (items) => localStorage.setItem(STORAGE_KEY, JSON.stringify(items)),
-  { deep: true },
+  persistTodos,
+  { deep: true, immediate: true },
 )
 
-watch(themeMode, (mode) => localStorage.setItem(THEME_STORAGE_KEY, mode))
+watch(themeMode, persistThemeMode)
 
 const remainingCount = computed(() => todos.value.filter((todo) => !todo.completed).length)
 const completedCount = computed(() => todos.value.length - remainingCount.value)
@@ -89,12 +155,6 @@ onMounted(() => {
 })
 
 onBeforeUnmount(() => themeMediaQuery?.removeEventListener('change', updateSystemTheme))
-
-function createId() {
-  return typeof crypto.randomUUID === 'function'
-    ? crypto.randomUUID()
-    : `${Date.now()}-${Math.random().toString(16).slice(2)}`
-}
 
 function addTodo() {
   const title = newTodo.value.trim()
@@ -199,7 +259,7 @@ function cancelEdit() {
           v-model="newTodo"
           class="new-todo-input"
           type="text"
-          maxlength="120"
+          :maxlength="MAX_TITLE_LENGTH"
           autocomplete="off"
           placeholder="例如：整理本周会议记录"
         />
@@ -256,7 +316,7 @@ function cancelEdit() {
             v-model="editingTitle"
             class="edit-input"
             type="text"
-            maxlength="120"
+            :maxlength="MAX_TITLE_LENGTH"
             @blur="saveEdit(todo)"
             @keyup.enter="saveEdit(todo)"
             @keyup.esc="cancelEdit"
@@ -287,6 +347,10 @@ function cancelEdit() {
         <p>{{ todos.length ? '这个筛选条件下没有任务' : '还没有待办事项' }}</p>
         <span>{{ todos.length ? '换个筛选条件看看吧。' : '从上方输入框添加第一项任务吧。' }}</span>
       </div>
+
+      <p v-if="storageWriteFailed" class="storage-warning" role="status">
+        当前无法保存更改，请检查浏览器存储空间或隐私设置。
+      </p>
 
       <footer class="card-footer">
         <span>{{ remainingCount ? `还有 ${remainingCount} 项待完成` : '全部完成，干得漂亮！' }}</span>
