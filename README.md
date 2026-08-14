@@ -9,7 +9,7 @@
 - **智能主题切换**：默认跟随系统浅色/深色设置；也可通过页面顶部按钮固定为浅色或深色，选择会被记住。
 - **响应式界面**：针对桌面和移动端布局优化，窄屏下主题控件与任务区域可正常显示和操作。
 - **纯前端、零后端依赖**：无需数据库或 API 服务，下载依赖后即可本地运行，也可作为静态站点部署到 Nginx。
-- **部署友好**：内置 Vite 构建脚本与 Nginx 配置示例，可直接部署到 Linux 服务器的 `10000` 端口。
+- **部署友好**：内置 Vite 构建脚本与 Nginx 配置示例，可直接部署到 Linux 服务器并启用 HTTPS。
 
 ## 技术栈
 
@@ -49,9 +49,9 @@ npm run preview
 
 构建结果会生成在 `dist/` 目录。预览服务器默认地址为 `http://127.0.0.1:4173/`。
 
-## 服务器部署（Nginx）
+## 服务器部署（Nginx + HTTPS）
 
-仓库包含适用于 Nginx 的配置文件：[deploy/nginx-vue3-todo-list.conf](deploy/nginx-vue3-todo-list.conf)。默认将站点部署到 `/var/www/vue3-todo-list`，并监听 `10000` 端口。
+仓库包含适用于 Nginx 的配置文件：[deploy/nginx-vue3-todo-list.conf](deploy/nginx-vue3-todo-list.conf)。配置使用 `app.example.com` 作为示例域名，部署前请替换为自己的域名；HTTP 会自动跳转到 HTTPS。
 
 ### 1. 构建项目
 
@@ -62,14 +62,17 @@ npm install
 npm run build
 ```
 
-### 2. 安装 Nginx
+### 2. 安装 Nginx 与 acme.sh
 
 以下示例适用于 Debian / Ubuntu 服务器：
 
 ```bash
 sudo apt-get update
-sudo apt-get install -y nginx
+sudo apt-get install -y nginx curl
+curl https://get.acme.sh | sudo sh
 ```
+
+安装脚本会创建每日续签任务；本示例使用 Let’s Encrypt 作为 ACME CA。
 
 ### 3. 上传构建产物
 
@@ -81,28 +84,39 @@ scp -r dist/* <server>:/var/www/vue3-todo-list/
 ssh <server> "sudo chmod 755 /var/www/vue3-todo-list /var/www/vue3-todo-list/assets && sudo find /var/www/vue3-todo-list -type f -exec chmod 644 {} +"
 ```
 
-最后一条命令很重要：它让 Nginx 可以读取构建后的 JavaScript 与 CSS 文件。
+### 4. 首次申请并安装证书
 
-### 4. 启用 Nginx 站点
+将下方命令中的 `app.example.com` 替换为你的实际域名。首次申请时先启用临时 HTTP 配置，让 acme.sh 通过网站根目录完成 HTTP-01 校验：
+
+```bash
+scp deploy/nginx-vue3-todo-list-http.conf <server>:/tmp/vue3-todo-list-http.conf
+ssh <server> "sudo cp /tmp/vue3-todo-list-http.conf /etc/nginx/sites-available/vue3-todo-list && sudo rm -f /etc/nginx/sites-enabled/default && sudo ln -sfn /etc/nginx/sites-available/vue3-todo-list /etc/nginx/sites-enabled/vue3-todo-list && sudo nginx -t && sudo systemctl enable --now nginx"
+ssh <server> "sudo /root/.acme.sh/acme.sh --issue --server letsencrypt -d app.example.com -w /var/www/vue3-todo-list"
+ssh <server> "sudo install -d -m 755 /etc/nginx/ssl/app.example.com && sudo /root/.acme.sh/acme.sh --install-cert -d app.example.com --key-file /etc/nginx/ssl/app.example.com/privkey.pem --fullchain-file /etc/nginx/ssl/app.example.com/fullchain.pem --reloadcmd 'systemctl reload nginx'"
+```
+
+### 5. 启用 HTTPS 站点
 
 先将配置文件上传到服务器，再启用站点：
 
 ```bash
 scp deploy/nginx-vue3-todo-list.conf <server>:/tmp/vue3-todo-list.conf
-ssh <server> "sudo cp /tmp/vue3-todo-list.conf /etc/nginx/sites-available/vue3-todo-list && sudo rm -f /etc/nginx/sites-enabled/default && sudo ln -sfn /etc/nginx/sites-available/vue3-todo-list /etc/nginx/sites-enabled/vue3-todo-list && sudo nginx -t && sudo systemctl enable --now nginx && sudo systemctl reload nginx"
+ssh <server> "sudo cp /tmp/vue3-todo-list.conf /etc/nginx/sites-available/vue3-todo-list && sudo nginx -t && sudo systemctl reload nginx"
 ```
 
-若服务器启用了 UFW，还需要放行端口：
+若服务器启用了 UFW，还需要放行 80 和 443 端口：
 
 ```bash
-sudo ufw allow 10000/tcp
+sudo ufw allow 'Nginx Full'
 ```
 
 部署完成后访问：
 
 ```text
-http://<服务器 IP>:10000/
+https://app.example.com/
 ```
+
+证书续签由 acme.sh 的每日任务自动检查；续签并复制新证书后，会通过 `systemctl reload nginx` 让 Nginx 使用新证书。
 
 ### 更新部署
 
