@@ -10,7 +10,7 @@
 - **智能主题切换**：默认跟随系统浅色/深色设置；也可通过页面顶部按钮固定为浅色或深色，选择会被记住。
 - **响应式界面**：针对桌面和移动端布局优化，窄屏下主题控件与任务区域可正常显示和操作。
 - **纯前端、零后端依赖**：无需数据库或 API 服务，下载依赖后即可本地运行，也可作为静态站点部署到 Nginx。
-- **部署友好**：内置 Vite 构建脚本与 Nginx 配置示例，可直接部署到 Linux 服务器的 `8001` 端口。
+- **部署友好**：内置 Vite 构建脚本与 Nginx 配置示例，可直接部署到 Linux 服务器的 `3001` 端口。
 
 ## 技术栈
 
@@ -52,7 +52,7 @@ npm run preview
 
 ## 服务器部署（Nginx）
 
-仓库包含适用于 Nginx 的配置文件：[deploy/nginx-vue3-todo-list.conf](deploy/nginx-vue3-todo-list.conf)。默认将站点部署到 `/var/www/vue3-todo-list`，并监听 `8001` 端口。
+仓库包含适用于 Nginx 的配置文件：[deploy/nginx-vue3-todo-list.conf](deploy/nginx-vue3-todo-list.conf)。默认将站点部署到 `/var/www/vue3-todo-list`，并监听 `3001` 端口。
 
 ### 1. 构建项目
 
@@ -96,13 +96,13 @@ ssh <server> "sudo cp /tmp/vue3-todo-list.conf /etc/nginx/sites-available/vue3-t
 若服务器启用了 UFW，还需要放行端口：
 
 ```bash
-sudo ufw allow 8001/tcp
+sudo ufw allow 3001/tcp
 ```
 
 部署完成后访问：
 
 ```text
-http://<服务器 IP>:8001/
+http://<服务器 IP>:3001/
 ```
 
 ### 更新部署
