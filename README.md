@@ -1,13 +1,14 @@
 <div align="center">
 
-# TodoList
+<h1>
+  <img src="./public/favicon.svg" alt="TodoList logo" width="42" height="42" valign="middle">
+  TodoList
+</h1>
 
 一个轻量、无后端、隐私优先的待办清单应用。
 用 Vue 3 构建，开箱即用，数据保存在当前浏览器中。
 
 <p>
-  <a href="https://todo.loliowo.com/">在线体验</a>
-  ·
   <a href="#快速开始">快速开始</a>
   ·
   <a href="#部署到-nginx">部署指南</a>
@@ -18,7 +19,7 @@
 [![Vue 3](https://img.shields.io/badge/Vue.js-3-42b883?logo=vuedotjs&logoColor=white)](https://vuejs.org/)
 [![Vite](https://img.shields.io/badge/Vite-6-646CFF?logo=vite&logoColor=white)](https://vite.dev/)
 [![Node.js](https://img.shields.io/badge/Node.js-18%2B-339933?logo=nodedotjs&logoColor=white)](https://nodejs.org/)
-[![License](https://img.shields.io/badge/license-not%20declared-lightgrey)](#许可证)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](./LICENSE)
 
 </div>
 
@@ -282,4 +283,4 @@ npm run build
 
 ## 许可证
 
-当前仓库尚未声明具体的开源许可证。如需公开分发、商用或二次开发，请先补充 `LICENSE` 文件并明确授权范围。
+本项目采用 [MIT License](./LICENSE) 开源许可证。你可以自由使用、修改、分发本项目，但请保留原始版权和许可证声明。
