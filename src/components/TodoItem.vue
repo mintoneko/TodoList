@@ -8,7 +8,7 @@ const props = defineProps({
   },
 })
 
-const emit = defineEmits(['update-title', 'remove'])
+const emit = defineEmits(['update-title', 'toggle', 'remove'])
 
 const isEditing = ref(false)
 const editingTitle = ref('')
@@ -48,7 +48,11 @@ function cancelEdit() {
       class="check-control"
       :aria-label="todo.completed ? `标记 ${todo.title} 为未完成` : `标记 ${todo.title} 为已完成`"
     >
-      <input v-model="todo.completed" type="checkbox" />
+      <input
+        :checked="todo.completed"
+        type="checkbox"
+        @change="emit('toggle', todo.id)"
+      />
       <span class="checkmark" aria-hidden="true">✓</span>
     </label>
 
