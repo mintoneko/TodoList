@@ -105,7 +105,16 @@ function handleDisable() {
             :aria-label="showApiKey ? '隐藏密钥' : '显示密钥'"
             @click="showApiKey = !showApiKey"
           >
-            {{ showApiKey ? '隐藏' : '显示' }}
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <template v-if="showApiKey">
+                <path d="m3 3 18 18M10.58 10.59a2 2 0 0 0 2.83 2.82" />
+                <path d="M9.88 5.09A10.94 10.94 0 0 1 12 4.9c7 0 10 7.1 10 7.1a15.2 15.2 0 0 1-3.08 4.37M6.61 6.61A15.8 15.8 0 0 0 2 12s3 7.1 10 7.1a10.94 10.94 0 0 0 5.39-1.49" />
+              </template>
+              <template v-else>
+                <path d="M2 12s3-7.1 10-7.1S22 12 22 12s-3 7.1-10 7.1S2 12 2 12Z" />
+                <circle cx="12" cy="12" r="3" />
+              </template>
+            </svg>
           </button>
         </div>
 
